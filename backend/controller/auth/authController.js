@@ -9,6 +9,16 @@ const registerUser = async(req,res)=>{
     const {userName, email, password} = req.body;
 
     try {
+
+        const checkUser = await User.findOne({email})
+        if(checkUser) return res.json({
+            success:false,
+            message:"email aready exists"
+        })
+
+
+
+
         const hashPassword = await bcrypt.hash(password,12);  //hash password
         const newUser = new User({
             userName,
@@ -34,10 +44,39 @@ const registerUser = async(req,res)=>{
 
 //login
 
-const login = async(req,res)=>{
-    const {email, password} = req.body;
+const loginUser = async(req,res)=>{
+    
 
     try {
+        const {email, password} = req.body;
+        const checkUser = await User.findOne({email})
+
+        if(!checkUser) return res.json({
+            success:false,
+            message:"Account does not exist"
+        })
+
+        const checkPassword = await bcrypt.compare(password, checkUser.password)
+        if(!checkPassword) return res.json({
+            success:false,
+            message:'password is incorrect'
+        })
+
+
+        const token = jwt.sign({
+                      id:checkUser._id, role: checkUser.role, email:checkUser.email
+                      },"CLIENT_SECRET_KEY", {expiresIn:'60m'})
+
+        res.cookie('token', token, {httpOnly:true, secure:false})
+        .json({
+            success:true,
+            message:"login successfull!",
+            user:{
+                id:checkUser._id,
+                role:checkUser.role,
+                email:checkUser.email
+            }
+        })
         
     } catch (error) {
         console.log(error);
@@ -51,12 +90,35 @@ const login = async(req,res)=>{
 
 //logout
 
+const logoutUser = (req, res)=>{
+    res.clearCookie('token').json({success:true, message:'logged out successfully'})
+}
 
 
 
+//middleware
+
+const authMiddleware =(req,res,next)=>{
+    const token = req.cookies.token
+   
+    if(!token) return res.status(401).json({success:false, message:"unauthorized token"})
+
+        try {
+
+            const decode = jwt.verify(token,"CLIENT_SECRET_KEY")
+            req.user=decode
+            next()
+            
+        } catch (error) {
 
 
+            res.status(401).json({success:false, message:'unauthorized token'})
+        }
+
+
+
+}
 
 //exports
 
-export {registerUser}
+export {registerUser, loginUser, logoutUser,authMiddleware}
