@@ -1,4 +1,4 @@
-import { registerFormControls } from '@/config'
+
 import {
     Select,
     SelectContent,
@@ -39,17 +39,23 @@ function CommonForm({formControls, formData, setFormData, onSubmit, buttonText})
                         <Select onValueChange={(value)=> setFormData({
                             ...formData, [controlItem.name]: value
                         })}    value={value}>
+                            
                             <SelectTrigger className='w-full'>
-                                <SelectValue placeholder={controlItem.placeholder}>
-                                    <SelectContent>
+                            <SelectValue  placeholder={controlItem.label}/>
+                            <SelectContent>
+                               
+                                    
                                     {controlItem.options &&
-                                     controlItem.options.length > 0?
+                                     controlItem.options.length > 0 ?
                                      controlItem.options
-                                     .map(optionItem =><SelectItem key={optionItem.id} value ={optionItem.id}>{optionItem.label}</SelectItem>)
+                                     .map(optionItem => {
+                                        return(<SelectItem key= {optionItem.id} value = {optionItem.id}>{optionItem.label}</SelectItem>)})
                                      : null
                                     }
-                                    </SelectContent>
-                                </SelectValue>
+                                    
+                                
+                                </SelectContent>
+                            
                             </SelectTrigger>
                         </Select>
                     )

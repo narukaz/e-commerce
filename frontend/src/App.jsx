@@ -14,16 +14,24 @@ import ShopHome from "./pages/shopping-view/Home";
 import ShopListing from "./pages/shopping-view/Listing";
 import ShopCheckout from "./pages/shopping-view/checkout";
 import CheckAuth from "./components/common/checkAuth";
-import { Check } from "lucide-react";
 import UnAuthPage from "./components/unAuth";
+import {checkAuth} from './store/auth-slice/index'
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
 
 function App() {
-  const isAuthenticated = false;
-  const user =null;
-  //  {
-  //   name: "John Doe",
-  //   role:'user'
-  // };
+ 
+  const {user, isAuthenticated,isLoading} = useSelector((state)=> state.auth)
+
+  const dispatch = useDispatch();
+
+
+
+  useEffect(()=>{
+        dispatch(checkAuth())
+  },[dispatch])
+
+  if(isLoading) return <div className="flex justify-center items-center w-full h-screen"><h1 className="text-[40px]">...is Loading</h1></div>
 
   return (
     <Routes>
