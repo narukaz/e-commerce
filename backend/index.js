@@ -1,17 +1,20 @@
-import express from  'express'; //import
-const app = express();
-import connectToMongoose from './controller/connection.js'; //import
-import cookieParser from 'cookie-parser'; //import
-import authRouter from './routes/auth-routes.js'
-import productsRouter from './routes/admin/products-routes.js'
+import cookieParser from 'cookie-parser'
+import express from 'express'
 import cors from 'cors'
+import authRoute from './routes/auth-router/auth-router.js'
+import AdminProductRouter from './routes/admin/products-routes.js'
+import connectToMongoose from './config/config.js'
+import ShopProductRouter from './routes/shop/products-route.js'
+import ShopCartRouter from './routes/shop/cart-route.js'
+import AddressRouter  from './routes/shop/addressRoutes.js'
+import shopOrderRouter from './routes/shop/order/order-routes.js'
+import shopSearchRouter from './routes/shop/searchRoutes.js'
+import AdminOrderRouter from './routes/admin/orders/order-routes.js'
+import shopReviews from './routes/shop/reviewRoute.js'
+import commonFeatureRoute from './routes/common/features-Routes.js'
+const app = express()
 
 
-const PORT = process.env.PORT || 3000;//environment PORT variable
-
-connectToMongoose('mongodb://localhost:27017/e-commerce')
-.then(console.log("mongoDBconnected"))//success
-.catch(err => console.log("connection error with mongo"))//failed
 
 app.use(cors({
     origin: 'http://localhost:5173', 
@@ -20,15 +23,38 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'cache-control', 'Expires'] 
 }))
 
-
-app.use(express.json())
-app.use(cookieParser())
-app.use('/auth', authRouter)
-app.use('/admin/products',productsRouter)
+app.use(express.json())//setting up json parser
+app.use(cookieParser())//setting up cookie parsing
 
 
+connectToMongoose('mongodb://localhost:27017/e-commerce')
+.then(data => {
+    if(data){
+        console.log('connected to database')
+    }})
+.catch(err => console.log(err?.message))
 
-app.listen(PORT, ()=> console.log(`port is running at ${PORT}`))
 
 
 
+
+
+
+
+app.use('/auth', authRoute)
+app.use('/admin/products', AdminProductRouter)
+app.use('/admin/orders', AdminOrderRouter)
+app.use('/shop/products', ShopProductRouter)
+
+app.use('/shop/cart', ShopCartRouter)
+app.use('/shop/address', AddressRouter)
+app.use('/shop/order', shopOrderRouter)
+app.use('/shop/search', shopSearchRouter)
+app.use('/shop/reviews', shopReviews)
+app.use('/common/features', commonFeatureRoute)
+
+
+// enviroment variables
+const PORT = 3000
+
+app.listen(3000, ()=> console.log('app live on port --> ' , PORT))
